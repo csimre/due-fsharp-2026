@@ -3,6 +3,8 @@
 		<TargetFramework>net10.0</TargetFramework>
 	</PropertyGroup>
 	<ItemGroup>
+		<Compile Include="Models\Domain.fs" />
+		<Compile Include="Data\InMemoryGymRepository.fs" />
 		<Compile Include="Models\ErrorViewModel.fs" />
 		<Compile Include="Controllers\HomeController.fs" />
 		<Compile Include="Program.fs" />
