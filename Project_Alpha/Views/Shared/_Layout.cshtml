@@ -45,15 +45,37 @@
     <footer class="footer-shell">
         <div class="container-xl footer-content">
             <span>&copy; 2026 Konditerem Management System</span>
-            <span>F# + ASP.NET Core MVC + SQLite</span>
         </div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        window.addEventListener('load', function () {
+            var pos = sessionStorage.getItem('scrollPos');
+            if (pos) {
+                window.scrollTo(0, parseInt(pos));
+                sessionStorage.removeItem('scrollPos');
+            }
+
+            setTimeout(function () {
+                document.querySelectorAll('.alert').forEach(function (el) {
+                    el.style.transition = 'opacity 0.5s';
+                    el.style.opacity = '0';
+                    setTimeout(function () { el.remove(); }, 500);
+                });
+            }, 3000);
+        });
+
+        document.querySelectorAll('form').forEach(function (form) {
+            form.addEventListener('submit', function () {
+                sessionStorage.setItem('scrollPos', window.scrollY);
+            });
+        });
+    </script>
 </body>
 </html>

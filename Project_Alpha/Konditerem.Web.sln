@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11626.88 stable
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Konditerem.Web", "Konditerem.Web.fsproj", "{FFDDB7B9-34FA-3115-44D2-8083C907A81F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FFDDB7B9-34FA-3115-44D2-8083C907A81F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFDDB7B9-34FA-3115-44D2-8083C907A81F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFDDB7B9-34FA-3115-44D2-8083C907A81F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFDDB7B9-34FA-3115-44D2-8083C907A81F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {88AD25E7-7636-4894-9B2F-1EDECB6DD980}
+	EndGlobalSection
+EndGlobal
