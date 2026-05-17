@@ -1,0 +1,390 @@
+﻿@model Konditerem.Web.Models.HomePageViewModel
+@{
+    ViewData["Title"] = "Konditerem admin";
+}
+
+<section class="hero-panel">
+    <div>
+        <span class="eyebrow">F# alapú szakdolgozati alkalmazás</span>
+        <h1>Konditerem Management System</h1>
+        <p>
+            Webes adminfelület a dokumentációban szereplő modulokkal: felhasználók, nyitvatartás,
+            napi kapacitás és foglalások. A háttérben SQLite fut, így Linux szerveren is egyszerűen deployolható.
+        </p>
+    </div>
+    <div class="hero-meta">
+        <div>
+            <span>Mai nap</span>
+            <strong>@Model.Today</strong>
+        </div>
+        <div>
+            <span>Állapot</span>
+            <strong>Üzemkész</strong>
+        </div>
+    </div>
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.FlashMessage))
+{
+    <div class="alert alert-success shadow-sm">@Model.FlashMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.FlashError))
+{
+    <div class="alert alert-danger shadow-sm">@Model.FlashError</div>
+}
+
+<section class="summary-grid">
+    <article class="summary-card">
+        <span>Összes tag</span>
+        <strong>@Model.Summary.TotalUsers</strong>
+    </article>
+    <article class="summary-card">
+        <span>Aktív tag</span>
+        <strong>@Model.Summary.ActiveUsers</strong>
+    </article>
+    <article class="summary-card">
+        <span>Aktív foglalás</span>
+        <strong>@Model.Summary.ActiveBookings</strong>
+    </article>
+    <article class="summary-card">
+        <span>Mai bentlévők / szabad hely</span>
+        <strong>@Model.Summary.CapacityToday / @Model.Summary.AvailableToday</strong>
+    </article>
+</section>
+
+<section id="users" class="module-panel">
+    <div class="module-heading">
+        <div>
+            <span class="eyebrow">Users</span>
+            <h2>Felhasználók kezelése</h2>
+        </div>
+    </div>
+    <div class="module-grid">
+        <form asp-action="CreateUser" method="post" class="editor-card">
+            <h3>Új felhasználó</h3>
+            <label>Név<input name="name" class="form-control" required /></label>
+            <label>Email<input name="email" type="email" class="form-control" required /></label>
+            <label>Telefon<input name="phone" class="form-control" /></label>
+            <label>
+                Bérlet
+                <select name="membershipType" class="form-select">
+                    @foreach (var membership in Model.MembershipTypes)
+                    {
+                        <option value="@membership">@membership</option>
+                    }
+                </select>
+            </label>
+            <label class="checkbox-row">
+                <input type="hidden" name="active" value="false" />
+                <input type="checkbox" name="active" value="true" checked /> Aktív státusz
+            </label>
+            <button type="submit" class="btn btn-primary">Létrehozás</button>
+        </form>
+
+        <form asp-action="UpdateUser" method="post" class="editor-card accent-card">
+            <h3>Felhasználó frissítése</h3>
+            <label>Azonosító<input name="id" type="number" min="1" class="form-control" required /></label>
+            <label>Név<input name="name" class="form-control" required /></label>
+            <label>Email<input name="email" type="email" class="form-control" required /></label>
+            <label>Telefon<input name="phone" class="form-control" /></label>
+            <label>
+                Bérlet
+                <select name="membershipType" class="form-select">
+                    @foreach (var membership in Model.MembershipTypes)
+                    {
+                        <option value="@membership">@membership</option>
+                    }
+                </select>
+            </label>
+            <label class="checkbox-row">
+                <input type="hidden" name="active" value="false" />
+                <input type="checkbox" name="active" value="true" checked /> Aktív státusz
+            </label>
+            <button type="submit" class="btn btn-dark">Frissítés</button>
+        </form>
+    </div>
+
+    <div class="table-shell">
+        <table class="table table-dark table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Név</th>
+                    <th>Email</th>
+                    <th>Telefon</th>
+                    <th>Bérlet</th>
+                    <th>Regisztráció</th>
+                    <th>Aktív</th>
+                    <th>Művelet</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Users)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.Name</td>
+                        <td>@item.Email</td>
+                        <td>@item.Phone</td>
+                        <td>@item.MembershipType</td>
+                        <td>@item.RegistrationDate.ToString("yyyy-MM-dd")</td>
+                        <td>@(item.Active ? "Igen" : "Nem")</td>
+                        <td>
+                            <form asp-action="DeleteUser" method="post" class="inline-form">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-light">Törlés</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section id="hours" class="module-panel">
+    <div class="module-heading">
+        <div>
+            <span class="eyebrow">Opening Hours</span>
+            <h2>Nyitvatartás kezelése</h2>
+        </div>
+    </div>
+    <div class="module-grid">
+        <form asp-action="CreateOpeningHours" method="post" class="editor-card">
+            <h3>Új nyitvatartás</h3>
+            <label>
+                Hét napja
+                <select name="dayOfWeek" class="form-select">
+                    @foreach (var day in Model.DaysOfWeek)
+                    {
+                        <option value="@day">@day</option>
+                    }
+                </select>
+            </label>
+            <label>Nyitás<input name="openTime" type="time" class="form-control" required /></label>
+            <label>Zárás<input name="closeTime" type="time" class="form-control" required /></label>
+            <button type="submit" class="btn btn-primary">Mentés</button>
+        </form>
+
+        <form asp-action="UpdateOpeningHours" method="post" class="editor-card accent-card">
+            <h3>Nyitvatartás frissítése</h3>
+            <label>Azonosító<input name="id" type="number" min="1" class="form-control" required /></label>
+            <label>
+                Hét napja
+                <select name="dayOfWeek" class="form-select">
+                    @foreach (var day in Model.DaysOfWeek)
+                    {
+                        <option value="@day">@day</option>
+                    }
+                </select>
+            </label>
+            <label>Nyitás<input name="openTime" type="time" class="form-control" required /></label>
+            <label>Zárás<input name="closeTime" type="time" class="form-control" required /></label>
+            <button type="submit" class="btn btn-dark">Frissítés</button>
+        </form>
+    </div>
+
+    <div class="table-shell">
+        <table class="table table-dark table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nap</th>
+                    <th>Nyitás</th>
+                    <th>Zárás</th>
+                    <th>Művelet</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OpeningHours)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.DayOfWeek</td>
+                        <td>@item.OpenTime</td>
+                        <td>@item.CloseTime</td>
+                        <td>
+                            <form asp-action="DeleteOpeningHours" method="post" class="inline-form">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-light">Törlés</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section id="capacity" class="module-panel">
+    <div class="module-heading">
+        <div>
+            <span class="eyebrow">Capacity</span>
+            <h2>Kapacitás és be-/kiléptetés</h2>
+        </div>
+    </div>
+    <div class="module-grid">
+        <form asp-action="CreateCapacity" method="post" class="editor-card">
+            <h3>Új kapacitásnap</h3>
+            <label>Dátum<input name="date" type="date" value="@Model.Today" class="form-control" required /></label>
+            <label>Maximális kapacitás<input name="maxCapacity" type="number" min="0" class="form-control" required /></label>
+            <label>Aktuális létszám<input name="currentCount" type="number" min="0" class="form-control" value="0" required /></label>
+            <button type="submit" class="btn btn-primary">Létrehozás</button>
+        </form>
+
+        <form asp-action="UpdateCapacity" method="post" class="editor-card accent-card">
+            <h3>Kapacitás frissítése</h3>
+            <label>Azonosító<input name="id" type="number" min="1" class="form-control" required /></label>
+            <label>Dátum<input name="date" type="date" value="@Model.Today" class="form-control" required /></label>
+            <label>Maximális kapacitás<input name="maxCapacity" type="number" min="0" class="form-control" required /></label>
+            <label>Aktuális létszám<input name="currentCount" type="number" min="0" class="form-control" required /></label>
+            <button type="submit" class="btn btn-dark">Frissítés</button>
+        </form>
+    </div>
+
+    <div class="table-shell">
+        <table class="table table-dark table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Dátum</th>
+                    <th>Max</th>
+                    <th>Jelenlegi</th>
+                    <th>Szabad hely</th>
+                    <th>Státusz</th>
+                    <th>Művelet</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Capacities)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.Date.ToString("yyyy-MM-dd")</td>
+                        <td>@item.MaxCapacity</td>
+                        <td>@item.CurrentCount</td>
+                        <td>@item.AvailableSpots</td>
+                        <td>@(item.IsFull ? "Tele" : "Foglalható")</td>
+                        <td>
+                            <div class="action-row">
+                                <form asp-action="IncrementCapacity" method="post" class="inline-form">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-sm btn-success">+1</button>
+                                </form>
+                                <form asp-action="DecrementCapacity" method="post" class="inline-form">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-sm btn-warning">-1</button>
+                                </form>
+                                <form asp-action="DeleteCapacity" method="post" class="inline-form">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-light">Törlés</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section id="bookings" class="module-panel">
+    <div class="module-heading">
+        <div>
+            <span class="eyebrow">Bookings</span>
+            <h2>Foglalások kezelése</h2>
+        </div>
+    </div>
+    <div class="module-grid">
+        <form asp-action="CreateBooking" method="post" class="editor-card">
+            <h3>Új foglalás</h3>
+            <label>
+                Felhasználó
+                <select name="userId" class="form-select">
+                    @foreach (var user in Model.Users)
+                    {
+                        <option value="@user.Id">#@user.Id - @user.Name (@(user.Active ? "aktív" : "inaktív"))</option>
+                    }
+                </select>
+            </label>
+            <label>Dátum<input name="bookingDate" type="date" value="@Model.Today" class="form-control" required /></label>
+            <label>Időpont<input name="bookingTime" type="time" class="form-control" required /></label>
+            <label>
+                Státusz
+                <select name="status" class="form-select">
+                    @foreach (var status in Model.BookingStatuses)
+                    {
+                        <option value="@status">@status</option>
+                    }
+                </select>
+            </label>
+            <button type="submit" class="btn btn-primary">Létrehozás</button>
+        </form>
+
+        <form asp-action="UpdateBooking" method="post" class="editor-card accent-card">
+            <h3>Foglalás frissítése</h3>
+            <label>Foglalás ID<input name="id" type="number" min="1" class="form-control" required /></label>
+            <label>
+                Felhasználó
+                <select name="userId" class="form-select">
+                    @foreach (var user in Model.Users)
+                    {
+                        <option value="@user.Id">#@user.Id - @user.Name</option>
+                    }
+                </select>
+            </label>
+            <label>Dátum<input name="bookingDate" type="date" value="@Model.Today" class="form-control" required /></label>
+            <label>Időpont<input name="bookingTime" type="time" class="form-control" required /></label>
+            <label>
+                Státusz
+                <select name="status" class="form-select">
+                    @foreach (var status in Model.BookingStatuses)
+                    {
+                        <option value="@status">@status</option>
+                    }
+                </select>
+            </label>
+            <button type="submit" class="btn btn-dark">Frissítés</button>
+        </form>
+    </div>
+
+    <div class="table-shell">
+        <table class="table table-dark table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Felhasználó</th>
+                    <th>Dátum</th>
+                    <th>Idő</th>
+                    <th>Státusz</th>
+                    <th>Művelet</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Bookings)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.UserName (#@item.UserId)</td>
+                        <td>@item.BookingDate.ToString("yyyy-MM-dd")</td>
+                        <td>@item.BookingTime</td>
+                        <td>@item.Status</td>
+                        <td>
+                            <div class="action-row">
+                                <form asp-action="CancelBooking" method="post" class="inline-form">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-sm btn-warning">Lemondás</button>
+                                </form>
+                                <form asp-action="DeleteBooking" method="post" class="inline-form">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-light">Törlés</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
