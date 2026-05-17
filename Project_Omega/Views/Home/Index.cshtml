@@ -6,10 +6,7 @@
 <section class="hero-panel">
     <div>        
         <h1>Konditerem Management System</h1>
-        <p>
-            Webes adminfelület a dokumentációban szereplő modulokkal: felhasználók, nyitvatartás,
-            napi kapacitás és foglalások.
-        </p>
+        
     </div>
     <div class="hero-meta">
         <div>
@@ -60,7 +57,7 @@
         </div>
     </div>
     <div class="module-grid">
-        <form asp-action="CreateUser" method="post" class="editor-card">
+        <form asp-action="CreateUser" method="post" class="editor-card" id="create-user-form">
             <h3>Új felhasználó</h3>
             <label>Név<input name="name" class="form-control" pattern="^[^0-9]+$" title="A név nem tartalmazhat számot" required /></label>
             <label>Email<input name="email" type="email" class="form-control" autocomplete="email" required /></label>
@@ -75,13 +72,13 @@
                 </select>
             </label>
             <label class="checkbox-row">
-                <input type="hidden" name="active" value="false" />
                 <input type="checkbox" name="active" value="true" checked /> Aktív státusz
+                <input type="hidden" name="active" value="false" />
             </label>
             <button type="submit" class="btn btn-primary">Létrehozás</button>
         </form>
 
-        <form asp-action="UpdateUser" method="post" class="editor-card accent-card">
+        <form asp-action="UpdateUser" method="post" class="editor-card accent-card" id="update-user-form">
             <h3>Felhasználó frissítése</h3>
             <label>Azonosító<input name="id" type="number" min="1" class="form-control" required /></label>
             <label>Név<input name="name" class="form-control" pattern="^[^0-9]+$" title="A név nem tartalmazhat számot" required /></label>
@@ -97,8 +94,8 @@
                 </select>
             </label>
             <label class="checkbox-row">
-                <input type="hidden" name="active" value="false" />
                 <input type="checkbox" name="active" value="true" checked /> Aktív státusz
+                <input type="hidden" name="active" value="false" />
             </label>
             <button type="submit" class="btn btn-dark">Frissítés</button>
         </form>
@@ -121,7 +118,13 @@
             <tbody>
                 @foreach (var item in Model.Users)
                 {
-                    <tr>
+                    <tr class="clickable-row js-fill-user"
+                        data-id="@item.Id"
+                        data-name="@item.Name"
+                        data-email="@item.Email"
+                        data-phone="@item.Phone"
+                        data-membership-type="@item.MembershipType"
+                        data-active="@(item.Active ? "true" : "false")">
                         <td>@item.Id</td>
                         <td>@item.Name</td>
                         <td>@item.Email</td>
@@ -150,7 +153,7 @@
         </div>
     </div>
     <div class="module-grid">
-        <form asp-action="CreateOpeningHours" method="post" class="editor-card">
+        <form asp-action="CreateOpeningHours" method="post" class="editor-card" id="create-opening-hours-form">
             <h3>Új nyitvatartás</h3>
             <label>
                 Hét napja
@@ -166,7 +169,7 @@
             <button type="submit" class="btn btn-primary">Mentés</button>
         </form>
 
-        <form asp-action="UpdateOpeningHours" method="post" class="editor-card accent-card">
+        <form asp-action="UpdateOpeningHours" method="post" class="editor-card accent-card" id="update-opening-hours-form">
             <h3>Nyitvatartás frissítése</h3>
             <label>Azonosító<input name="id" type="number" min="1" class="form-control" required /></label>
             <label>
@@ -198,7 +201,11 @@
             <tbody>
                 @foreach (var item in Model.OpeningHours)
                 {
-                    <tr>
+                    <tr class="clickable-row js-fill-opening-hours"
+                        data-id="@item.Id"
+                        data-day-of-week="@item.DayOfWeek"
+                        data-open-time="@item.OpenTime"
+                        data-close-time="@item.CloseTime">
                         <td>@item.Id</td>
                         <td>@item.DayOfWeek</td>
                         <td>@item.OpenTime</td>
@@ -224,7 +231,7 @@
         </div>
     </div>
     <div class="module-grid">
-        <form asp-action="CreateCapacity" method="post" class="editor-card">
+        <form asp-action="CreateCapacity" method="post" class="editor-card" id="create-capacity-form">
             <h3>Új kapacitásnap</h3>
             <label>Dátum<input name="date" type="date" value="@Model.Today" class="form-control" required /></label>
             <label>Maximális kapacitás<input name="maxCapacity" type="number" min="0" class="form-control" required /></label>
@@ -232,7 +239,7 @@
             <button type="submit" class="btn btn-primary">Létrehozás</button>
         </form>
 
-        <form asp-action="UpdateCapacity" method="post" class="editor-card accent-card">
+        <form asp-action="UpdateCapacity" method="post" class="editor-card accent-card" id="update-capacity-form">
             <h3>Kapacitás frissítése</h3>
             <label>Azonosító<input name="id" type="number" min="1" class="form-control" required /></label>
             <label>Dátum<input name="date" type="date" value="@Model.Today" class="form-control" required /></label>
@@ -258,7 +265,11 @@
             <tbody>
                 @foreach (var item in Model.Capacities)
                 {
-                    <tr>
+                    <tr class="clickable-row js-fill-capacity"
+                        data-id="@item.Id"
+                        data-date="@item.Date.ToString("yyyy-MM-dd")"
+                        data-max-capacity="@item.MaxCapacity"
+                        data-current-count="@item.CurrentCount">
                         <td>@item.Id</td>
                         <td>@item.Date.ToString("yyyy-MM-dd")</td>
                         <td>@item.MaxCapacity</td>
@@ -296,7 +307,7 @@
         </div>
     </div>
     <div class="module-grid">
-        <form asp-action="CreateBooking" method="post" class="editor-card">
+        <form asp-action="CreateBooking" method="post" class="editor-card" id="create-booking-form">
             <h3>Új foglalás</h3>
             <label>
                 Felhasználó
@@ -321,7 +332,7 @@
             <button type="submit" class="btn btn-primary">Létrehozás</button>
         </form>
 
-        <form asp-action="UpdateBooking" method="post" class="editor-card accent-card">
+        <form asp-action="UpdateBooking" method="post" class="editor-card accent-card" id="update-booking-form">
             <h3>Foglalás frissítése</h3>
             <label>Foglalás ID<input name="id" type="number" min="1" class="form-control" required /></label>
             <label>
@@ -363,7 +374,12 @@
             <tbody>
                 @foreach (var item in Model.Bookings)
                 {
-                    <tr>
+                    <tr class="clickable-row js-fill-booking"
+                        data-id="@item.Id"
+                        data-user-id="@item.UserId"
+                        data-booking-date="@item.BookingDate.ToString("yyyy-MM-dd")"
+                        data-booking-time="@item.BookingTime"
+                        data-status="@item.Status">
                         <td>@item.Id</td>
                         <td>@item.UserName (#@item.UserId)</td>
                         <td>@item.BookingDate.ToString("yyyy-MM-dd")</td>
@@ -387,3 +403,14 @@
         </table>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        window.konditeremForms = {
+            user: "update-user-form",
+            openingHours: "update-opening-hours-form",
+            capacity: "update-capacity-form",
+            booking: "update-booking-form"
+        };
+    </script>
+}

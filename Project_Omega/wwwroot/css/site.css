@@ -10,11 +10,13 @@
   --brand: #ff7a18;
   --brand-2: #f4c430;
   --success: #14b87a;
+  --header-offset: 92px;
 }
 
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  scroll-padding-top: var(--header-offset);
 }
 
 body {
@@ -40,6 +42,14 @@ a {
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(14px);
   margin-bottom: 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+.module-panel,
+.hero-panel {
+  scroll-margin-top: var(--header-offset);
 }
 
 .navbar-brand {
@@ -226,6 +236,18 @@ a {
   --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
   --bs-table-hover-bg: rgba(255, 255, 255, 0.04);
   --bs-table-border-color: rgba(255, 255, 255, 0.08);
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row td {
+  transition: background-color 0.18s ease;
+}
+
+.clickable-row:hover td {
+  background-color: rgba(255, 122, 24, 0.08);
 }
 
 .action-row,
