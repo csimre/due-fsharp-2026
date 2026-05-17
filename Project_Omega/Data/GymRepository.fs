@@ -40,7 +40,7 @@ type SqliteGymRepository(configuration: IConfiguration) =
           "Vasárnap" ]
 
     let membershipTypes = [ "Napijegy"; "Havi"; "Negyedéves"; "Éves"; "Diák" ]
-    let bookingStatuses = [ "active"; "cancelled"; "completed" ]
+    let bookingStatuses = [ "Aktív"; "Lemondva"; "Befejezett" ]
 
     let configuredPath =
         match configuration.["Database:Path"] with
@@ -84,14 +84,17 @@ type SqliteGymRepository(configuration: IConfiguration) =
 
     let validateEmail email =
         let normalized = normalizeText email
+        let allowedPattern = Regex(@"^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$", RegexOptions.CultureInvariant)
 
         if String.IsNullOrWhiteSpace(normalized) then
             Error "Érvényes email cím megadása kötelező."
+        elif not (allowedPattern.IsMatch(normalized)) then
+            Error "Az email cím formátuma hibás (pl. hiányzik a .com vagy .hu végződés)."
         else
             try
                 let parsed = MailAddress(normalized)
 
-                if parsed.Address <> normalized || not (parsed.Address.Contains('.')) then
+                if parsed.Address <> normalized then
                     Error "Az email cím formátuma hibás."
                 else
                     Ok(parsed.Address.ToLowerInvariant())
@@ -197,7 +200,7 @@ type SqliteGymRepository(configuration: IConfiguration) =
 
     let ensureBookingUnique bookingId userId bookingDate bookingTime =
         let sql =
-            "SELECT COUNT(1) FROM bookings WHERE user_id = $userId AND booking_date = $bookingDate AND booking_time = $bookingTime AND status = 'active' AND id <> $bookingId;"
+            "SELECT COUNT(1) FROM bookings WHERE user_id = $userId AND booking_date = $bookingDate AND booking_time = $bookingTime AND status = 'Aktív' AND id <> $bookingId;"
 
         let duplicates =
             executeScalarInt
@@ -276,7 +279,7 @@ type SqliteGymRepository(configuration: IConfiguration) =
 
         { TotalUsers = users.Length
           ActiveUsers = users |> List.filter (fun item -> item.Active) |> List.length
-          ActiveBookings = bookings |> List.filter (fun item -> item.Status = "active") |> List.length
+          ActiveBookings = bookings |> List.filter (fun item -> item.Status = "Aktív") |> List.length
           CapacityToday = todayCapacity.CurrentCount
           AvailableToday = todayCapacity.AvailableSpots }
 
@@ -328,7 +331,7 @@ type SqliteGymRepository(configuration: IConfiguration) =
                     user_id INTEGER NOT NULL,
                     booking_date TEXT NOT NULL,
                     booking_time TEXT NOT NULL,
-                    status TEXT NOT NULL DEFAULT 'active',
+                    status TEXT NOT NULL DEFAULT 'Aktív',
                     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                 );
 
@@ -637,7 +640,7 @@ type SqliteGymRepository(configuration: IConfiguration) =
                     if not (ensureUserExists userId) then
                         invalidOp "Csak aktív felhasználóhoz lehet foglalást menteni."
 
-                    if validStatus = "active" && not (ensureBookingUnique id userId bookingDate bookingTime) then
+                    if validStatus = "Aktív" && not (ensureBookingUnique id userId bookingDate bookingTime) then
                         invalidOp "A felhasználónak már van aktív foglalása erre az időpontra."
 
                     let affected =
@@ -675,7 +678,7 @@ type SqliteGymRepository(configuration: IConfiguration) =
                 (fun () ->
                     let affected =
                         executeNonQuery
-                            "UPDATE bookings SET status = 'cancelled' WHERE id = $id AND status <> 'cancelled';"
+                            "UPDATE bookings SET status = 'Lemondva' WHERE id = $id AND status <> 'Lemondva';"
                             (fun command -> addParam command "$id" id)
 
                     if affected = 0 then

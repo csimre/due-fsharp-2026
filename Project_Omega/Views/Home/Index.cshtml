@@ -1,4 +1,4 @@
-﻿@model Konditerem.Web.Models.HomePageViewModel
+@model Konditerem.Web.Models.HomePageViewModel
 @{
     ViewData["Title"] = "Konditerem admin";
 }
@@ -52,7 +52,6 @@
 <section id="users" class="module-panel">
     <div class="module-heading">
         <div>
-            <span class="eyebrow">Users</span>
             <h2>Felhasználók kezelése</h2>
         </div>
     </div>
@@ -60,7 +59,7 @@
         <form asp-action="CreateUser" method="post" class="editor-card" id="create-user-form">
             <h3>Új felhasználó</h3>
             <label>Név<input name="name" class="form-control" pattern="^[^0-9]+$" title="A név nem tartalmazhat számot" required /></label>
-            <label>Email<input name="email" type="email" class="form-control" autocomplete="email" required /></label>
+            <label>Email<input name="email" type="email" class="form-control" autocomplete="email" pattern="^[^@@\s]+@@[^@@\s]+\.[a-zA-Z]{2,}$" title="Kérlek adj meg egy érvényes email címet (pl. pelda@gmail.com)" required /></label>
             <label>Telefon<input name="phone" type="tel" class="form-control" autocomplete="tel" pattern="^\+?[0-9\s\-()/]{8,20}$" minlength="8" maxlength="20" title="Adj meg egy érvényes telefonszámot, például +36 30 123 4567" required /></label>
             <label>
                 Bérlet
@@ -82,7 +81,7 @@
             <h3>Felhasználó frissítése</h3>
             <label>Azonosító<input name="id" type="number" min="1" class="form-control" required /></label>
             <label>Név<input name="name" class="form-control" pattern="^[^0-9]+$" title="A név nem tartalmazhat számot" required /></label>
-            <label>Email<input name="email" type="email" class="form-control" autocomplete="email" required /></label>
+            <label>Email<input name="email" type="email" class="form-control" autocomplete="email" pattern="^[^@@\s]+@@[^@@\s]+\.[a-zA-Z]{2,}$" title="Kérlek adj meg egy érvényes email címet (pl. pelda@gmail.com)" required /></label>
             <label>Telefon<input name="phone" type="tel" class="form-control" autocomplete="tel" pattern="^\+?[0-9\s\-()/]{8,20}$" minlength="8" maxlength="20" title="Adj meg egy érvényes telefonszámot, például +36 30 123 4567" required /></label>
             <label>
                 Bérlet
@@ -148,7 +147,6 @@
 <section id="hours" class="module-panel">
     <div class="module-heading">
         <div>
-            <span class="eyebrow">Opening Hours</span>
             <h2>Nyitvatartás kezelése</h2>
         </div>
     </div>
@@ -226,7 +224,6 @@
 <section id="capacity" class="module-panel">
     <div class="module-heading">
         <div>
-            <span class="eyebrow">Capacity</span>
             <h2>Kapacitás és be-/kiléptetés</h2>
         </div>
     </div>
@@ -302,7 +299,6 @@
 <section id="bookings" class="module-panel">
     <div class="module-heading">
         <div>
-            <span class="eyebrow">Bookings</span>
             <h2>Foglalások kezelése</h2>
         </div>
     </div>
