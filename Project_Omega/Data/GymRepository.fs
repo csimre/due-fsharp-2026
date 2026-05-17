@@ -225,7 +225,7 @@ type SqliteGymRepository(configuration: IConfiguration) =
 
     let readOpeningHours () =
         queryList
-            "SELECT id, day_of_week, open_time, close_time FROM opening_hours ORDER BY id ASC;"
+            "SELECT id, day_of_week, open_time, close_time FROM opening_hours ORDER BY CASE day_of_week WHEN 'Hétfő' THEN 1 WHEN 'Kedd' THEN 2 WHEN 'Szerda' THEN 3 WHEN 'Csütörtök' THEN 4 WHEN 'Péntek' THEN 5 WHEN 'Szombat' THEN 6 WHEN 'Vasárnap' THEN 7 ELSE 8 END ASC;"
             ignore
             (fun reader ->
                 { Id = reader.GetInt32(0)
