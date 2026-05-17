@@ -3,6 +3,8 @@ namespace Konditerem.Web.Data
 open System
 open System.Globalization
 open System.IO
+open System.Net.Mail
+open System.Text.RegularExpressions
 open Microsoft.Data.Sqlite
 open Microsoft.Extensions.Configuration
 open Konditerem.Web.Models
@@ -70,13 +72,45 @@ type SqliteGymRepository(configuration: IConfiguration) =
         else
             Ok(normalizeText value)
 
+    let validateName name =
+        let normalized = normalizeText name
+
+        if String.IsNullOrWhiteSpace(normalized) then
+            Error "A név megadása kötelező."
+        elif normalized |> Seq.exists Char.IsDigit then
+            Error "A név nem tartalmazhat számot."
+        else
+            Ok normalized
+
     let validateEmail email =
         let normalized = normalizeText email
 
-        if String.IsNullOrWhiteSpace(normalized) || not (normalized.Contains("@")) then
+        if String.IsNullOrWhiteSpace(normalized) then
             Error "Érvényes email cím megadása kötelező."
         else
-            Ok(normalized.ToLowerInvariant())
+            try
+                let parsed = MailAddress(normalized)
+
+                if parsed.Address <> normalized || not (parsed.Address.Contains('.')) then
+                    Error "Az email cím formátuma hibás."
+                else
+                    Ok(parsed.Address.ToLowerInvariant())
+            with _ ->
+                Error "Az email cím formátuma hibás."
+
+    let validatePhone phone =
+        let normalized = normalizeText phone
+        let allowedPattern = Regex("^\+?[0-9\s\-()/]+$", RegexOptions.CultureInvariant)
+        let digitCount = normalized |> Seq.filter Char.IsDigit |> Seq.length
+
+        if String.IsNullOrWhiteSpace(normalized) then
+            Error "Telefonszám megadása kötelező."
+        elif not (allowedPattern.IsMatch(normalized)) then
+            Error "A telefonszám csak számokat, szóközt, +, -, / és zárójeleket tartalmazhat."
+        elif digitCount < 8 || digitCount > 15 then
+            Error "A telefonszám 8 és 15 számjegy közötti legyen."
+        else
+            Ok normalized
 
     let validateCapacity maxCapacity currentCount =
         if maxCapacity < 0 then
@@ -343,7 +377,7 @@ type SqliteGymRepository(configuration: IConfiguration) =
             protectWrite
                 (fun () ->
                     let validatedName =
-                        match validateRequired "név" name with
+                        match validateName name with
                         | Ok value -> value
                         | Error error -> invalidOp error
 
@@ -352,12 +386,17 @@ type SqliteGymRepository(configuration: IConfiguration) =
                         | Ok value -> value
                         | Error error -> invalidOp error
 
+                    let validatedPhone =
+                        match validatePhone phone with
+                        | Ok value -> value
+                        | Error error -> invalidOp error
+
                     executeNonQuery
                         "INSERT INTO users (name, email, phone, membership_type, registration_date, active) VALUES ($name, $email, $phone, $membershipType, $registrationDate, $active);"
                         (fun command ->
                             addParam command "$name" validatedName
                             addParam command "$email" validatedEmail
-                            addParam command "$phone" (normalizeText phone)
+                            addParam command "$phone" validatedPhone
                             addParam command "$membershipType" (normalizeText membershipType)
                             addParam command "$registrationDate" (toDateString DateTime.UtcNow.Date)
                             addParam command "$active" (if active then 1 else 0))
@@ -368,12 +407,17 @@ type SqliteGymRepository(configuration: IConfiguration) =
             protectWrite
                 (fun () ->
                     let validatedName =
-                        match validateRequired "név" name with
+                        match validateName name with
                         | Ok value -> value
                         | Error error -> invalidOp error
 
                     let validatedEmail =
                         match validateEmail email with
+                        | Ok value -> value
+                        | Error error -> invalidOp error
+
+                    let validatedPhone =
+                        match validatePhone phone with
                         | Ok value -> value
                         | Error error -> invalidOp error
 
@@ -384,7 +428,7 @@ type SqliteGymRepository(configuration: IConfiguration) =
                                 addParam command "$id" id
                                 addParam command "$name" validatedName
                                 addParam command "$email" validatedEmail
-                                addParam command "$phone" (normalizeText phone)
+                                addParam command "$phone" validatedPhone
                                 addParam command "$membershipType" (normalizeText membershipType)
                                 addParam command "$active" (if active then 1 else 0))
 

@@ -63,9 +63,9 @@
     <div class="module-grid">
         <form asp-action="CreateUser" method="post" class="editor-card">
             <h3>Új felhasználó</h3>
-            <label>Név<input name="name" class="form-control" required /></label>
-            <label>Email<input name="email" type="email" class="form-control" required /></label>
-            <label>Telefon<input name="phone" class="form-control" /></label>
+            <label>Név<input name="name" class="form-control" pattern="^[^0-9]+$" title="A név nem tartalmazhat számot" required /></label>
+            <label>Email<input name="email" type="email" class="form-control" autocomplete="email" required /></label>
+            <label>Telefon<input name="phone" type="tel" class="form-control" autocomplete="tel" pattern="^\+?[0-9\s\-()/]{8,20}$" minlength="8" maxlength="20" title="Adj meg egy érvényes telefonszámot, például +36 30 123 4567" required /></label>
             <label>
                 Bérlet
                 <select name="membershipType" class="form-select">
@@ -85,9 +85,9 @@
         <form asp-action="UpdateUser" method="post" class="editor-card accent-card">
             <h3>Felhasználó frissítése</h3>
             <label>Azonosító<input name="id" type="number" min="1" class="form-control" required /></label>
-            <label>Név<input name="name" class="form-control" required /></label>
-            <label>Email<input name="email" type="email" class="form-control" required /></label>
-            <label>Telefon<input name="phone" class="form-control" /></label>
+            <label>Név<input name="name" class="form-control" pattern="^[^0-9]+$" title="A név nem tartalmazhat számot" required /></label>
+            <label>Email<input name="email" type="email" class="form-control" autocomplete="email" required /></label>
+            <label>Telefon<input name="phone" type="tel" class="form-control" autocomplete="tel" pattern="^\+?[0-9\s\-()/]{8,20}$" minlength="8" maxlength="20" title="Adj meg egy érvényes telefonszámot, például +36 30 123 4567" required /></label>
             <label>
                 Bérlet
                 <select name="membershipType" class="form-select">
